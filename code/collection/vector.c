@@ -51,12 +51,11 @@ inline void vector_set_back(struct vector *vector, void * elem)
 static void vector_factor_resize(struct vector *vector)
 {
 	unsigned int size;
-	if (vector->size == 0) {
+	if (vector->size == 0)
 		size = vector->alloc_factor;
-	} else {
+	else
 		size = vector->alloc_factor * vector->size;
-	}
-    
+	
 	vector_resize(vector, size);    
 }
 
