@@ -3,8 +3,6 @@
 
 #include <stdlib.h>
 
-#define VECTOR_DEFAULT_ALLOC_FACTOR 2
-
 #define VECTOR_GET_ELEM(vector, index)			\
 	vector->array + (vector->elem_size * index)	\
 

@@ -2,6 +2,8 @@
 
 #include <string.h>
 
+#define VECTOR_DEFAULT_ALLOC_FACTOR 2
+
 /* Resizes the vector based on the allocation factor.  */
 static void vector_factor_resize(struct vector *vector);
 
