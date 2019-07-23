@@ -2,7 +2,7 @@
 
 #include <string.h>
 
-/* Resizes the factor based on the allocation factor.  */
+/* Resizes the vector based on the allocation factor.  */
 static void vector_factor_resize(struct vector *vector);
 
 void vector_init(struct vector *vector, size_t elem_size)
