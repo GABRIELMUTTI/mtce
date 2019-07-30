@@ -2,6 +2,7 @@
 #define SPARSE_SET_H
 
 #include <stdlib.h>
+
 #include "vector.h"
 
 struct sparse_set {

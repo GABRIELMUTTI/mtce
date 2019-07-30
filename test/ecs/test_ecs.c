@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+
 #include "ecs/world.h"
 #include "collection/vector.h"
 
@@ -42,12 +43,10 @@ int main() {
 
 	for (unsigned int i = 0; i < world->entities.count; i++) {
 		struct mtecs_entity *entity = vector_get(&world->entities, i);
-		struct C1 *c1 = mtecs_get_comp(world, entity, 0);
-		
-		printf("Entity: %s\n", entity->name);
+		struct C1 *c1 = mtecs_get_comp(world, *entity, 0);
+
 		printf("C1 id: %d,\tid2: %d\n", c1->id, c1->id2);
 	}
-    
 
 	mtecs_world_free(world);
 

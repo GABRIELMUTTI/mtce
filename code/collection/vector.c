@@ -2,7 +2,8 @@
 
 #include <string.h>
 
-#define VECTOR_DEFAULT_ALLOC_FACTOR 2
+#define VECTOR_GET_ELEM(vector, index)			\
+	vector->array + (vector->elem_size * index)	\
 
 /* Resizes the vector based on the allocation factor.  */
 static void vector_factor_resize(struct vector *vector);
@@ -82,6 +83,12 @@ inline void vector_remove_back(struct vector *vector)
 	vector->count--;
 }
 
+void vector_remove_fill(struct vector *vector, unsigned int index)
+{
+	vector_clone(vector, index, vector->count - 1);
+	vector_remove_back(vector);
+}
+
 void vector_fill(struct vector *vector, void *elem)
 {
 	for (unsigned int i = vector->count; i < vector->size; i++) {
@@ -114,3 +121,19 @@ inline void vector_clear(struct vector *vector)
 	vector->count = 0;
 }
 
+void vector_sparse_set(struct vector *vector, unsigned int index, void *elem)
+{
+	vector_set(vector, index, elem);
+	vector->count++;
+}
+
+void *vector_sparse_create(struct vector *vector, unsigned int index)
+{
+	vector->count++;
+	return VECTOR_GET_ELEM(vector, index);
+}
+
+inline void vector_sparse_remove(struct vector *vector)
+{
+	vector->count--;
+}

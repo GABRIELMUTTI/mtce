@@ -2,8 +2,8 @@ CXX  		:= gcc
 CXX_FLAGS 	:= -Wall -Wextra -fdiagnostics-color -g
 
 BIN		:= bin
-MAIN		:= test_ecs.c
-SRC		:= ../../code/collection/*.c ../../code/ecs/*.c
+MAIN		:= test_hash_set.c
+SRC		:= ../../code/collection/*.c
 INCLUDE		:= -I../../code
 
 EXECUTABLE	:= main
