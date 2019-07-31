@@ -4,6 +4,14 @@
 #include <stdlib.h>
 
 #define VECTOR_DEFAULT_ALLOC_FACTOR 2
+#define VECTOR_INITIALIZER(_elem_size)					\
+	(struct vector) {						\
+		.array = NULL,						\
+			.elem_size = _elem_size,			\
+			.count = 0,					\
+			.size = 0,					\
+			.alloc_factor = VECTOR_DEFAULT_ALLOC_FACTOR	\
+			}
 
 struct vector {
 	
@@ -15,7 +23,7 @@ struct vector {
 	unsigned int alloc_factor;
 };
 
-void vector_init(struct vector *vector, size_t elem_size);
+struct vector *vector_init(struct vector *vector, size_t elem_size);
 void vector_free(struct vector *vector);
 
 void *vector_get(struct vector *vector, unsigned int index);

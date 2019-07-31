@@ -1,96 +1,113 @@
 #include "linked_list.h"
 
+#define LIST_NODE_SIZE(list) (sizeof(struct list_node) + list->value_size)
+
 #include <string.h>
 
-#define ENTRY_SIZE(linked_list) (sizeof(struct linked_list) + linked_list->value_size)
 
-struct linked_list *linked_list_init(size_t value_size)
+
+
+
+struct linked_list *linked_list_init(struct linked_list* list, size_t value_size, equals_fun equals)
 {
-	struct linked_list *linked_list = malloc(sizeof(struct linked_list) + value_size);
-	linked_list->next = NULL;
-	linked_list->value_size = value_size;
-	linked_list->has_value = 0;
+	if (!list) { list = malloc(sizeof(*list)); }
+	
+	list->head = NULL;
+	list->tail = NULL;
+	list->value_size = value_size;
+	list->count = 0;
+	list->equals = equals;
 
-	return linked_list;
+	return list;
 }
 
-void linked_list_free(struct linked_list *linked_list)
+void linked_list_free(struct linked_list *list)
 {
-	struct linked_list *cur = linked_list;
-	struct linked_list *next = NULL;
+	struct list_node *cur = list->head;
+	struct list_node *next = NULL;
 	while (cur != NULL) {
 		next = cur->next;
 		free(cur);
 		cur = next;
 	}
+
+	free(list);
 }
 
-void linked_list_push_back(struct linked_list *linked_list, void *value)
+void linked_list_push_back(struct linked_list *list, void *value)
 {
-	if (!linked_list->has_value) {
-		linked_list->has_value = 1;
-		memcpy(&linked_list->value, value, linked_list->value_size);
-		
+	struct list_node *new = malloc(LIST_NODE_SIZE(list));
+	if (!list->head) {
+		list->head = new;
 	} else {
-		struct linked_list *tail = linked_list_tail(linked_list);
-       	
-		tail->next = linked_list_init(tail->value_size);
-
-		tail->next->has_value = 1;
-		memcpy(&tail->next->value, value, tail->value_size);
+		struct list_node *tail = list->tail;
+		tail->next = new;
 	}
+
+	list->tail = new;
+	memcpy(&new->value, value, list->value_size);
+	list->count++;
 }
 
-void linked_list_index_remove(struct linked_list *linked_list, unsigned int index)
+void linked_list_index_remove(struct linked_list *list, unsigned int index)
 {
-	int found = 0;
 	unsigned int cur_index = 0;
-	struct linked_list *cur = linked_list;
-	struct linked_list *prev = NULL;
-	while (cur != NULL && cur_index != index) {
+	struct list_node *cur = list->head, *prev = NULL;
 
+	while (cur != NULL && cur_index != index) {
 		if (cur_index == index) {
-			found = 1;
-			break;			
+			linked_list_update_head_tail(list, cur, prev);
+			free(cur);
+			list->count--;
+			
+			return;
 		}
 
 		prev = cur;
 		cur = cur->next;
 	}
-
-	if (found && cur != NULL) {
-		if (prev) {
-			prev->next = cur->next;			
-		}
-
-		linked_list_free(cur);
-	}
 }
 
-struct linked_list *linked_list_tail(struct linked_list *linked_list)
+void linked_list_remove(struct linked_list *list, void *value)
 {
-	struct linked_list *cur = linked_list;
-	while (cur->next != NULL) {
-		cur = cur->next;
-	}
-
-	return cur;
-}
-
-/* Has memory leak on value */
-void linked_list_remove(struct linked_list *linked_list, void *value)
-{
-	struct linked_list *prev = NULL;
-	struct linked_list *cur = linked_list;
+	struct list_node *cur = list->head, *prev = NULL;
+	
 	while (cur != NULL) {
-		if (cur->equal_fun(&cur->value, value)) {
-			if (prev) {
-				prev->next = cur->next;
-			}
-
-			linked_list_free(cur);
+		if (list->equals(&cur->value, value)) {
+			linked_list_update_head_tail(list, cur, prev);
+			free(cur);
+			list->count--;
+			
 			return;
 		}
 	}
 }
 
+void *linked_list_get(struct linked_list *list, void *value)
+{
+	struct list_node *cur = list->head;
+
+	while (cur != NULL) {
+		if (list->equals(cur->value, value)) {
+			return cur->value;
+		}
+
+		cur = cur->next;
+	}
+
+	return NULL;
+}
+
+void linked_list_update_head_tail(struct linked_list *list, struct list_node *cur, struct list_node *prev)
+{
+	if (prev) {
+		prev->next = cur->next;
+
+		if (!cur->next) {
+			list->tail = prev;
+		}
+	} else {
+		list->head = NULL;
+		list->tail = NULL;
+	}
+}

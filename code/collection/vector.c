@@ -8,13 +8,15 @@
 /* Resizes the vector based on the allocation factor.  */
 static void vector_factor_resize(struct vector *vector);
 
-void vector_init(struct vector *vector, size_t elem_size)
+struct vector *vector_init(struct vector *vector, size_t elem_size)
 {
 	vector->array = NULL;
 	vector->count = 0;
 	vector->elem_size = elem_size;
 	vector->size = 0;
 	vector->alloc_factor = VECTOR_DEFAULT_ALLOC_FACTOR;
+
+	return vector;
 }
 
 inline void vector_free(struct vector *vector)

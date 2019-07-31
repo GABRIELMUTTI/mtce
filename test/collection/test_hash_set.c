@@ -3,6 +3,7 @@
 #include <stdlib.h>
 
 #include "collection/hash_set.h"
+#include "collection/vector.h"
 
 struct key_type {
 	unsigned int a;
@@ -30,13 +31,15 @@ unsigned int hash_function(void *key)
 
 int main()
 {
-	struct hash_set hash_set;
-	hash_set_init(&hash_set, hash_function, sizeof(struct key_type), sizeof(struct value_type));
-	hash_set.key_equal_fun = key_equal;
-	
-	hash_set_resize(&hash_set, 10000);
+	struct hash_set hash_set = HASH_SET_INITIALIZER(sizeof(struct key_type),
+							sizeof(struct value_type),
+							hash_function,
+							key_equal);
 
-	for (unsigned int i = 0; i < 100000; i++) {
+	
+	hash_set_resize(&hash_set, 1);
+
+	for (unsigned int i = 0; i < 2; i++) {
 		struct key_type k = {
 			.a = 1 + i,
 			.b = 2 + i
@@ -44,7 +47,7 @@ int main()
 		
 		struct value_type v = {
 		.a = i,
-		.b = 53.f + (float)i
+		.b = 54.0f
 	};
 
 		hash_set_insert(&hash_set, &k, &v);
@@ -53,7 +56,7 @@ int main()
 
 	printf("hash_set_count: %d\n", hash_set.count);
 
-	for (int i = 0; i < 100000; i++) {
+	for (int i = 1; i >= 0; i--) {
 
 
 		
@@ -64,7 +67,7 @@ int main()
 
 		struct value_type *k1_get = hash_set_get(&hash_set, &k);
 		
-///		printf("k: %d, %d \t-> \t%d, %f\n", k.a, k.b, k1_get->a, k1_get->b);
+		printf("k: %d, %d \t-> \t%d, %f\n", k.a, k.b, k1_get->a, k1_get->b);
 		hash_set_remove(&hash_set, &k);
 		
 
