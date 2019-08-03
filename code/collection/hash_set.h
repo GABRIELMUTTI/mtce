@@ -6,7 +6,7 @@
 #include "vector.h"
 #include "linked_list.h"
 
-#define HASH_SET_INITIALIZER(_key_size, _value_size, _hash, _key_equals) \
+#define HASH_SET_INITIALIZER(_key_size, _value_size, _hash) \
 	(struct hash_set) {						\
 		.entries = NULL,					\
 			.size = 0,					\
@@ -14,7 +14,6 @@
 			.key_size = _key_size,				\
 			.count = 0,					\
 			.hash = _hash,					\
-			.key_equals = _key_equals			\
 			}							     
 
 typedef unsigned int(*hash_fun)(void*);
@@ -43,10 +42,10 @@ struct hash_set *hash_set_init(struct hash_set *hash_set, hash_fun hash_fun, siz
 void hash_set_free(struct hash_set *hash_set);
 
 void hash_set_insert(struct hash_set *hash_set, void *key, void *value);
-void *hash_set_get(struct hash_set *hash_set, void *key);
+void *hash_set_get(const struct hash_set *hash_set, void *key);
 void hash_set_remove(struct hash_set *hash_set, void *key);
 
-int hash_set_exists(struct hash_set *hash_set, void *key);
+int hash_set_exists(const struct hash_set *hash_set, void *key);
 
 void hash_set_resize(struct hash_set *hash_set, unsigned int size);
 

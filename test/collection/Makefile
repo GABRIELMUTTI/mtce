@@ -1,21 +1,31 @@
 CXX  		:= gcc
 CXX_FLAGS 	:= -Wall -Wextra -fdiagnostics-color -g
 
-BIN		:= bin
-MAIN		:= test_hash_set.c
-SRC		:= ../../code/collection/*.c
-INCLUDE		:= -I../../code
+BIN			:= bin
+SRC			:= ../../code/collection/*.c
+INCLUDE			:= -I../../code -I../
 
-EXECUTABLE	:= main
 
-all: $(BIN)/$(EXECUTABLE)
+run: linked_list_run hash_set_run
 
-reb: clean all
+# linked_list
+linked_list: $(BIN)/test_linked_list
 
-run: clean all
-	./$(BIN)/$(EXECUTABLE)
-
-$(BIN)/$(EXECUTABLE): $(SRC) $(MAIN)
+$(BIN)/test_linked_list: $(SRC) test_linked_list.c
 	$(CXX) $(CXX_FLAGS) $(INCLUDE) $^ -o $@
+
+linked_list_run: clean linked_list
+	./$(BIN)/test_linked_list
+
+# hash_set
+hash_set: $(BIN)/test_hash_set
+
+$(BIN)/test_hash_set: $(SRC) test_hash_set.c
+	$(CXX) $(CXX_FLAGS) $(INCLUDE) $^ -o $@
+
+hash_set_run: clean hash_set
+	./$(BIN)/test_hash_set
+
 clean:
 	-rm $(BIN)/*
+

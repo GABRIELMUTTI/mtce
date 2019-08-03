@@ -14,12 +14,14 @@
 
 static int hash_set_default_key_equals(void *k1, void *k2);
 
-static unsigned int hash_set_hash(struct hash_set *hash_set, void *key);
+static unsigned int hash_set_hash(const struct hash_set *hash_set, void *key);
 static void hash_set_move_list_head(struct hash_set *hash_set, struct hash_set_entry *entry);
 
 
 struct hash_set *hash_set_init(struct hash_set *hash_set, hash_fun hash, size_t key_size, size_t value_size)
 {
+	if (!hash_set) { hash_set = realloc(hash_set, sizeof(*hash_set)); }
+	
 	hash_set->value_size = value_size;
 	hash_set->key_size = key_size;
 	hash_set->hash = hash;
@@ -52,7 +54,7 @@ void hash_set_insert(struct hash_set *hash_set, void* key, void *value)
 	struct hash_set_entry *entry = GET_ENTRY(hash_set, index);
 
 	if (entry->exists) {
-		void *entry_key = GET_PAIR_KEY(hash_set, &entry->value);
+		void *entry_key = GET_PAIR_KEY(hash_set, entry->value);
 		
 		/* If there's a conflict, add value to linked list */
 		if (!hash_set->key_equals(key, entry_key)) {
@@ -60,12 +62,11 @@ void hash_set_insert(struct hash_set *hash_set, void* key, void *value)
 				entry->list = linked_list_init(entry->list, PAIR_SIZE(hash_set), hash_set->key_equals);
 			}
 
-
 			char list_entry[PAIR_SIZE(hash_set)];
 
-			memcpy(GET_PAIR_KEY(hash_set, &list_entry), key, hash_set->key_size);
-			memcpy(GET_PAIR_VALUE(hash_set, &list_entry), value, hash_set->value_size);
-			
+			memcpy(list_entry, key, hash_set->key_size);
+			memcpy(list_entry + hash_set->key_size, value, hash_set->value_size);
+
 			linked_list_push_back(entry->list, list_entry);
 			
 			hash_set->count++;
@@ -77,11 +78,11 @@ void hash_set_insert(struct hash_set *hash_set, void* key, void *value)
 	}
 
 	entry->list = NULL;
-	memcpy(&entry->value, key, hash_set->key_size);
-	memcpy(GET_PAIR_VALUE(hash_set, &entry->value), value, hash_set->value_size);
+	memcpy(entry->value, key, hash_set->key_size);
+	memcpy(GET_PAIR_VALUE(hash_set, entry->value), value, hash_set->value_size);
 }
 
-void *hash_set_get(struct hash_set *hash_set, void *key)
+void *hash_set_get(const struct hash_set *hash_set, void *key)
 {
 	unsigned int index = hash_set_hash(hash_set, key);
 	struct hash_set_entry *entry = GET_ENTRY(hash_set, index);
@@ -89,7 +90,8 @@ void *hash_set_get(struct hash_set *hash_set, void *key)
 	void *entry_key = GET_PAIR_KEY(hash_set, &entry->value);
 
 	if (!hash_set->key_equals(key, entry_key)) {
-		return linked_list_get(entry->list, key);
+		void *list_entry = linked_list_get(entry->list, key);
+		return GET_PAIR_VALUE(hash_set, list_entry);
 	}
 
 	return GET_PAIR_VALUE(hash_set, &entry->value);
@@ -117,15 +119,22 @@ void hash_set_remove(struct hash_set *hash_set, void *key)
 	hash_set->count--;
 }
 
-int hash_set_exists(struct hash_set *hash_set, void *key)
+int hash_set_exists(const struct hash_set *hash_set, void *key)
 {
 	unsigned int index = hash_set_hash(hash_set, key);
 	struct hash_set_entry *entry = GET_ENTRY(hash_set, index);
+
+	if (!hash_set->key_equals(key, GET_PAIR_KEY(hash_set, entry->value))) {
+		if (!entry->list) { return 0; }
+
+		void *value = linked_list_get(entry->list, key);
+		return value == NULL ? 0 : 1;
+	}
 	
 	return entry->exists;
 }
 
-inline unsigned int hash_set_hash(struct hash_set *hash_set, void *key)
+inline unsigned int hash_set_hash(const struct hash_set *hash_set, void *key)
 {
 	return hash_set->hash(key) % hash_set->size;	
 }

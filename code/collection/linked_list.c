@@ -4,13 +4,9 @@
 
 #include <string.h>
 
-
-
-
-
 struct linked_list *linked_list_init(struct linked_list* list, size_t value_size, equals_fun equals)
 {
-	if (!list) { list = malloc(sizeof(*list)); }
+	if (!list) { list = realloc(list, sizeof(*list)); }
 	
 	list->head = NULL;
 	list->tail = NULL;
@@ -80,15 +76,18 @@ void linked_list_remove(struct linked_list *list, void *value)
 			
 			return;
 		}
+
+		prev = cur;
+		cur = cur->next;
 	}
 }
 
-void *linked_list_get(struct linked_list *list, void *value)
+void *linked_list_get(struct linked_list *list, void *key)
 {
 	struct list_node *cur = list->head;
 
 	while (cur != NULL) {
-		if (list->equals(cur->value, value)) {
+		if (list->equals(cur->value, key)) {
 			return cur->value;
 		}
 
@@ -107,7 +106,6 @@ void linked_list_update_head_tail(struct linked_list *list, struct list_node *cu
 			list->tail = prev;
 		}
 	} else {
-		list->head = NULL;
-		list->tail = NULL;
+		list->head = cur->next;
 	}
 }
